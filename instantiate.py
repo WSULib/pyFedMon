@@ -91,11 +91,14 @@ def sendJSONping(eventInfo):
 
 
 #Go Time.
-for pid in collectionObjs:
+#TESTING
+# collectionObjs = ['cfai:EB02a051']
+for pid in collectionObjs:    
     eventInfo = {}
     eventInfo['pid'] = pid
     eventInfo['type'] = "initialize"
     eventInfo = RDFqueries(eventInfo)
-    print "Sending the following JSON ping:\n",eventInfo
-    sendJSONping(eventInfo)      
+    print "Sending the following JSON ping:\n",eventInfo    
+    sendJSONping(eventInfo)
+    # time.sleep(5)      
 

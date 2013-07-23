@@ -62,8 +62,8 @@ def writeObjRow(fhand, PID):
 	
 	#write object row
 	#leaving out URL for now...
-	# row_string = '"{identifier}","{title}","http://fedoratest.lib.wayne.edu/fedora/objects/{identifier}/datastreams/ACCESS/content"\n'.format(identifier=identifier, title=title) 
-	row_string = '"{identifier}","{title}"\n'.format(identifier=identifier, title=title) 
+	row_string = '"{identifier}","{title}","http://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Corned_beef_hash_at_the_Creamery_%28Nina%27s_breakfast%29.jpg/320px-Corned_beef_hash_at_the_Creamery_%28Nina%27s_breakfast%29.jpg"\n'.format(identifier=identifier, title=title) 
+	# row_string = '"{identifier}","{title}"\n'.format(identifier=identifier, title=title) 
 	print row_string
 	fhand.write(row_string)
 
@@ -79,8 +79,8 @@ def writeObjRow(fhand, PID):
 collectionObjs = RDFqueries(collectionPID)
 fhand = open("testing.csv",'w')
 #write column headings
-# fhand.write("Dublin Core:Identifier, Dublin Core:Title, Item Type Metadata:URL\n")
-fhand.write("Dublin Core:Identifier, Dublin Core:Title\n")
+fhand.write("Dublin Core:Identifier, Dublin Core:Title, Item Type Metadata:URL\n")
+# fhand.write("Dublin Core:Identifier, Dublin Core:Title\n")
 #iterate through records
 for PID in collectionObjs:
 	writeObjRow(fhand, PID)

@@ -52,28 +52,32 @@ def writeObjRow(fhand, PID):
 	urlstring = "http://{username}:{password}@localhost/fedora/objects/{PID}/datastreams/DC/content".format(PID=PID,username=username,password=password)
 	# print urlstring
 	response = urllib.urlopen(urlstring)	
-	DC = response.read()
-	print DC
+	DC = response.read()	
 	DCroot = etree.fromstring(DC)
 
-	#WORKING
-	# title = DCroot.xpath('//dc:title', namespaces=nsmap)[0]
-	# print title.text
+	#Get title and identifier
+	identifier = DCroot.xpath('//dc:identifier', namespaces=nsmap)[0].text	
+	title = DCroot.xpath('//dc:title', namespaces=nsmap)[0].text
+	
+	#write object row
+	row_string = '"{identifier}","{title}","http://fedoratest.lib.wayne.edu/fedora/objects/{identifier}/ACCESS/content"\n'.format(identifier=identifier, title=title) 
+	print row_string
+	fhand.write(row_string)
 
-	elements = DCroot.xpath('//oai_dc:dc', namespaces=nsmap)[0]	
+	#iterative approach (not helpful, as CSV headings don't line up well)
+	# elements = DCroot.xpath('//oai_dc:dc', namespaces=nsmap)[0]	
 	#use .title() to cap first letter
 	# for each in elements:
 	# 	tag_name = each.tag.split("}")[1].title()
-	# 	print "Dublin Core: "+tag_name
-		
-	
-
-
+	# 	print "Dublin Core: "+tag_name		
 
 
 #Go time.
 collectionObjs = RDFqueries(collectionPID)
 fhand = open("testing.csv",'w')
+#write column headings
+fhand.write("Dublin Core: Identifier, Dublin Core: Title, Item Type Metadata:URL\n")
+#iterate through records
 for PID in collectionObjs:
 	writeObjRow(fhand, PID)
 fhand.close()

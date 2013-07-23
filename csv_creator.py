@@ -56,11 +56,14 @@ def writeObjRow(fhand, PID):
 	DCroot = etree.fromstring(DC)
 
 	#Get title and identifier
+	#STRIP OUT TABS OR COMMAS
 	identifier = DCroot.xpath('//dc:identifier', namespaces=nsmap)[0].text	
 	title = DCroot.xpath('//dc:title', namespaces=nsmap)[0].text
 	
 	#write object row
-	row_string = '"{identifier}","{title}","http://fedoratest.lib.wayne.edu/fedora/objects/{identifier}/ACCESS/content"\n'.format(identifier=identifier, title=title) 
+	#leaving out URL for now...
+	# row_string = '"{identifier}","{title}","http://fedoratest.lib.wayne.edu/fedora/objects/{identifier}/datastreams/ACCESS/content"\n'.format(identifier=identifier, title=title) 
+	row_string = '"{identifier}","{title}"\n'.format(identifier=identifier, title=title) 
 	print row_string
 	fhand.write(row_string)
 
@@ -76,7 +79,8 @@ def writeObjRow(fhand, PID):
 collectionObjs = RDFqueries(collectionPID)
 fhand = open("testing.csv",'w')
 #write column headings
-fhand.write("Dublin Core: Identifier, Dublin Core: Title, Item Type Metadata:URL\n")
+# fhand.write("Dublin Core:Identifier, Dublin Core:Title, Item Type Metadata:URL\n")
+fhand.write("Dublin Core:Identifier, Dublin Core:Title\n")
 #iterate through records
 for PID in collectionObjs:
 	writeObjRow(fhand, PID)

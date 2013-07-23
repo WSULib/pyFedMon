@@ -91,7 +91,6 @@ def RDFqueries(eventInfo):
     for identifier in iterLines:
         eventInfo['dc_identifier'] = re.sub('"','',identifier).strip()
 
-
     #return updated dictionary
     return eventInfo
 

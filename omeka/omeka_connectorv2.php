@@ -26,7 +26,7 @@ global $fileLoc;
 global $pid;
 global $dc_identifier;
 global $type;
-global $conV2V2;
+global $conV2;
 
 		//connect to MySQL db
 	// $conV2=mysqli_connect("hostname","username","passwd","db_name");
@@ -36,7 +36,7 @@ global $conV2V2;
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
 
-	$response = mysqli_query($conV2V2,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
+	$response = mysqli_query($conV2,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
 	while ($ri = $response->fetch_array()) 
 	{
 		$record_id = $ri[0];

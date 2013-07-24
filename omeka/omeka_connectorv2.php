@@ -26,35 +26,35 @@ global $fileLoc;
 global $pid;
 global $dc_identifier;
 global $type;
-global $con;
+global $conV2V2;
 
 		//connect to MySQL db
-	// $con=mysqli_connect("hostname","username","passwd","db_name");
+	// $conV2=mysqli_connect("hostname","username","passwd","db_name");
 
 	if (mysqli_connect_errno())
 	{
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
 
-	$response = mysqli_query($con,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
+	$response = mysqli_query($conV2V2,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
 	while ($ri = $response->fetch_array()) 
 	{
 		$record_id = $ri[0];
 	}
 
-	$response = mysqli_query($con,"SELECT filename FROM omeka_files WHERE item_id='$record_id'");
+	$response = mysqli_query($conV2,"SELECT filename FROM omeka_files WHERE item_id='$record_id'");
 	while ($af = $response->fetch_array())
 	{
 		$archive_filename = $af[0];
 	}
 
-	$response = mysqli_query($con,"SELECT value FROM omeka_options WHERE name='thumbnail_constraint'");
+	$response = mysqli_query($conV2,"SELECT value FROM omeka_options WHERE name='thumbnail_constraint'");
 	while ($tc = $response->fetch_array())
 	{
 		$thumbnail_constraint = $tc[0];
 	}
 
-	$response = mysqli_query($con,"SELECT value FROM omeka_options WHERE name='square_thumbnail_constraint'");
+	$response = mysqli_query($conV2,"SELECT value FROM omeka_options WHERE name='square_thumbnail_constraint'");
 	while ($stc = $response->fetch_array())
 	{
 		$square_thumbnail_constraint = $stc[0];
@@ -88,17 +88,17 @@ global $fileLoc;
 global $pid;
 global $dc_identifier;
 global $type;
-global $con;
+global $conV2;
 
 		//connect to MySQL db
-	// $con=mysqli_connect("hostname","username","passwd","db_name");
+	// $conV2=mysqli_connect("hostname","username","passwd","db_name");
 
 	if (mysqli_connect_errno())
 	{
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
 
-	$response = mysqli_query($con,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
+	$response = mysqli_query($conV2,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
 	while ($ri = $response->fetch_array()) 
 	{
 		$record_id = $ri[0];
@@ -178,71 +178,71 @@ global $con;
 
 // var_dump(get_defined_vars());
 	//Get record_type_id
-	$response = mysqli_query($con,"SELECT record_type_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
+	$response = mysqli_query($conV2,"SELECT record_type_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
 	while ($rti = $response->fetch_array()) 
 	{
 		$record_type_id = $rti[0];
 	}
 
 	//purge rows associated with record_id--this is only to update xml not anything to do with other datastreams
-	mysqli_query($con,"DELETE FROM omeka_element_texts WHERE record_id=(SELECT * from (SELECT record_id FROM omeka_element_texts WHERE element_id=43 AND text='{$dc_identifier}' LIMIT 1)as t)");
+	mysqli_query($conV2,"DELETE FROM omeka_element_texts WHERE record_id=(SELECT * from (SELECT record_id FROM omeka_element_texts WHERE element_id=43 AND text='{$dc_identifier}' LIMIT 1)as t)");
 
 	//iterate through DC elements and insert into table
 	//title
 	foreach ($titleArray as $title) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',50,'$record_type_id','{$title}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',50,'$record_type_id','{$title}')");
 	}
 	//identifier
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',43,'$record_type_id','{$dc_identifier}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',43,'$record_type_id','{$dc_identifier}')");
 	
 	//subjects
 	foreach ($subjArray as $subject) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',49,'$record_type_id','{$subject}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',49,'$record_type_id','{$subject}')");
 	}
 
 	//description
 	foreach ($descripArray as $description) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',41,'$record_type_id','{$description}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',41,'$record_type_id','{$description}')");
 	}	
 
 	//creator
 	foreach ($creatorArray as $creator) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',39,'$record_type_id','{$creator}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',39,'$record_type_id','{$creator}')");
 	}	
 
 	//date
 	foreach ($dateArray as $date) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',40,'$record_type_id','{$date}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',40,'$record_type_id','{$date}')");
 	}	
 
 	//type
 	foreach ($typeArray as $type) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',51,'$record_type_id','{$type}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',51,'$record_type_id','{$type}')");
 	}	
 
 	//format
 	foreach ($formatArray as $format) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',42,'$record_type_id','{$format}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',42,'$record_type_id','{$format}')");
 	}	
 
 	//language
 	foreach ($langArray as $language) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',44,'$record_type_id','{$language}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',44,'$record_type_id','{$language}')");
 	}	
 
 	//relation
 	foreach ($relatArray as $relation) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',46,'$record_type_id','{$relation}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',46,'$record_type_id','{$relation}')");
 	}	
 
 	//coverage
 	foreach ($coverArray as $coverage) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',38,'$record_type_id','{$coverage}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',38,'$record_type_id','{$coverage}')");
 	}	
 
 	//rights
 	foreach ($rightsArray as $rights) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',47,'$record_type_id','{$right}')");
+	mysqli_query($conV2,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',47,'$record_type_id','{$right}')");
 	}
 }
 

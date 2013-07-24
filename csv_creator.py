@@ -42,46 +42,51 @@ def RDFqueries(collectionPID):
 
 
 #Get DC datastream, write to CSV file
-def writeObjRow(fhand, PID):
+def writeObjRow(fhand, fexceptions, PID):
+	try:
 
-	#namespace map
-	nsmap = {'dc': 'http://purl.org/dc/elements/1.1/', 'oai_dc': 'http://www.openarchives.org/OAI/2.0/oai_dc/'}
+		#namespace map
+		nsmap = {'dc': 'http://purl.org/dc/elements/1.1/', 'oai_dc': 'http://www.openarchives.org/OAI/2.0/oai_dc/'}
 
 
-	#create array of tuples, e.g. ('title','horse race')
-	urlstring = "http://{username}:{password}@localhost/fedora/objects/{PID}/datastreams/DC/content".format(PID=PID,username=username,password=password)
-	# print urlstring
-	response = urllib.urlopen(urlstring)	
-	DC = response.read()	
-	DCroot = etree.fromstring(DC)
+		#create array of tuples, e.g. ('title','horse race')
+		urlstring = "http://{username}:{password}@localhost/fedora/objects/{PID}/datastreams/DC/content".format(PID=PID,username=username,password=password)
+		# print urlstring
+		response = urllib.urlopen(urlstring)	
+		DC = response.read()	
+		DCroot = etree.fromstring(DC)
 
-	#Get title and identifier
-	#STRIP OUT TABS OR COMMAS
-	identifier = DCroot.xpath('//dc:identifier', namespaces=nsmap)[0].text	
-	title = DCroot.xpath('//dc:title', namespaces=nsmap)[0].text
-	
-	#write object row
-	#leaving out URL for now...
-	row_string = '"{identifier}","{title}","http://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Corned_beef_hash_at_the_Creamery_%28Nina%27s_breakfast%29.jpg/320px-Corned_beef_hash_at_the_Creamery_%28Nina%27s_breakfast%29.jpg"\n'.format(identifier=identifier, title=title) 
-	# row_string = '"{identifier}","{title}"\n'.format(identifier=identifier, title=title) 
-	print row_string
-	fhand.write(row_string)
+		#Get title and identifier
+		#STRIP OUT TABS OR COMMAS
+		identifier = DCroot.xpath('//dc:identifier', namespaces=nsmap)[0].text	
+		title = DCroot.xpath('//dc:title', namespaces=nsmap)[0].text
+		
+		#write object row
+		#leaving out URL for now...
+		row_string = '"{identifier}","{title}","http://upload.wikimedia.org/wikipedia/commons/thumb/1/15/Corned_beef_hash_at_the_Creamery_%28Nina%27s_breakfast%29.jpg/320px-Corned_beef_hash_at_the_Creamery_%28Nina%27s_breakfast%29.jpg"\n'.format(identifier=identifier, title=title) 
+		# row_string = '"{identifier}","{title}"\n'.format(identifier=identifier, title=title) 
+		print row_string		
+		fhand.write(row_string)
+			
 
-	#iterative approach (not helpful, as CSV headings don't line up well)
-	# elements = DCroot.xpath('//oai_dc:dc', namespaces=nsmap)[0]	
-	#use .title() to cap first letter
-	# for each in elements:
-	# 	tag_name = each.tag.split("}")[1].title()
-	# 	print "Dublin Core: "+tag_name		
+		#iterative approach (not helpful, as CSV headings don't line up well)
+		# elements = DCroot.xpath('//oai_dc:dc', namespaces=nsmap)[0]	
+		#use .title() to cap first letter
+		# for each in elements:
+		# 	tag_name = each.tag.split("}")[1].title()
+		# 	print "Dublin Core: "+tag_name		
+	except:
+		fexceptions.write(PID+"\n")
 
 
 #Go time.
 collectionObjs = RDFqueries(collectionPID)
-fhand = open("testing.csv",'w')
+fhand = open("output.csv",'w')
+fexceptions = open("exceptions.csv","w")
 #write column headings
 fhand.write("Dublin Core:Identifier, Dublin Core:Title, Item Type Metadata:URL\n")
 # fhand.write("Dublin Core:Identifier, Dublin Core:Title\n")
 #iterate through records
 for PID in collectionObjs:
-	writeObjRow(fhand, PID)
+	writeObjRow(fhand, fexceptions, PID)
 fhand.close()

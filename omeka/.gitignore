@@ -1,0 +1,4 @@
+#that which should be ignored
+sensitive.*
+*.pyc
+*.csv

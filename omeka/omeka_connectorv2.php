@@ -26,6 +26,7 @@ global $fileLoc;
 global $pid;
 global $dc_identifier;
 global $type;
+global $con;
 
 		//connect to MySQL db
 	// $con=mysqli_connect("hostname","username","passwd","db_name");
@@ -87,6 +88,7 @@ global $fileLoc;
 global $pid;
 global $dc_identifier;
 global $type;
+global $con;
 
 		//connect to MySQL db
 	// $con=mysqli_connect("hostname","username","passwd","db_name");

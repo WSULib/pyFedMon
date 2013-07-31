@@ -34,6 +34,7 @@ next(iterLines)
 for PID in iterLines:        
     collectionObjs.append(PID.split("/")[1].strip())
 print collectionObjs
+totalCount = len(collectionObjs)
 
 
 
@@ -69,10 +70,14 @@ def RDFqueries(eventInfo):
         })
     risearch_host = "http://{username}:{password}@localhost/fedora/risearch?".format(username=username,password=password)
     collections = urllib.urlopen(risearch_host,risearch_params)   
+    
+    #BACKUP
     iterLines = iter(collections)  
     next(iterLines)  
     for identifier in iterLines:
-        eventInfo['dc_identifier'] = re.sub('"','',identifier).strip()
+        identifier_string = re.sub('"','',identifier).strip()         
+        if identifier_string.startswith("wayne:"):
+            eventInfo['dc_identifier'] = identifier_string
 
     #return updated dictionary
     return eventInfo
@@ -93,12 +98,15 @@ def sendJSONping(eventInfo):
 #Go Time.
 #TESTING
 # collectionObjs = ['wayne:MOTA_PH_19851986_1t_081', 'wayne:MOTA_PH_19791980_3r_001', 'wayne:MOTA_PH_19831984_3t_005', 'wayne:MOTA_PH_19831984_3t_006', 'wayne:MOTA_PH_19761977_1r_010']
-for pid in collectionObjs:    
+count = 1
+for pid in collectionObjs:
+    print "Working on",count,"of",totalCount
     eventInfo = {}
     eventInfo['pid'] = pid
     eventInfo['type'] = "initialize"
     eventInfo = RDFqueries(eventInfo)
     print "Sending the following JSON ping:\n",eventInfo    
-    sendJSONping(eventInfo)    
+    sendJSONping(eventInfo)
+    count = count + 1    
     # time.sleep(5)      
 

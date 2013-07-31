@@ -89,7 +89,9 @@ def RDFqueries(eventInfo):
     iterLines = iter(collections)  
     next(iterLines)  
     for identifier in iterLines:
-        eventInfo['dc_identifier'] = re.sub('"','',identifier).strip()
+        identifier_string = re.sub('"','',identifier).strip()         
+        if identifier_string.startswith("wayne:"):
+            eventInfo['dc_identifier'] = identifier_string
 
     #return updated dictionary
     return eventInfo

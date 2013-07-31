@@ -12,6 +12,7 @@ $sqthumbLoc = "archive/square_thumbnails";
 $fullsizeLoc = "archive/fullsize";
 $fileLoc = "archive/files";
 
+<<<<<<< HEAD
 //Testing
 // $pid = 'fedomeka:3';
 // $dc_identifier = 'fedomeka:3';
@@ -25,6 +26,11 @@ $fileLoc = "archive/files";
 //Change to where the file is converted to jpg and rename all of the extensions to jpg.  Get the hash not the extension too.
 //Put version on github; takeout all the passwords; make a 2.0 version
 
+=======
+
+// echo "this is the dc_identifier.....$dc_identifier";
+
+>>>>>>> 52a2ba386c7f0b429e8a4829c8b133eaa0768e76
 function updateImage()
 {
 
@@ -37,6 +43,10 @@ global $fileLoc;
 global $pid;
 global $dc_identifier;
 global $type;
+<<<<<<< HEAD
+=======
+global $con;
+>>>>>>> 52a2ba386c7f0b429e8a4829c8b133eaa0768e76
 
 		//connect to MySQL db
 	// $con=mysqli_connect("hostname","username","passwd","db_name");
@@ -78,6 +88,7 @@ global $type;
 	$cmd = "echo $OmekaLoc/$fullsizeLoc/$archive_filename $OmekaLoc/$thumbLoc/$archive_filename $OmekaLoc/$sqthumbLoc/$archive_filename | xargs -n 1 cp $outputfile && chown www-data:www-data $OmekaLoc/$fullsizeLoc/$archive_filename $OmekaLoc/$thumbLoc/$archive_filename $OmekaLoc/$sqthumbLoc/$archive_filename $outputfile";
 	exec($cmd);
 
+<<<<<<< HEAD
 //	$cmd = "convert $OmekaLoc/archive/thumbnails/$archive_filename -resize $thumbnail_constraint . "x" . $thumbnail_constraint\> $archive_filename";
 	$cmd = "/usr/bin/convert $OmekaLoc/$thumbLoc/$archive_filename -resize " . escapeshellarg($thumbnail_constraint.'x'.$thumbnail_constraint.'>'). " $OmekaLoc/$thumbLoc/$archive_filename";
 	// echo $cmd;
@@ -88,6 +99,12 @@ global $type;
 //convert 43886080d2206b5a9dc71e171fd725b2.jpg -thumbnail x200*2 -resize 200*2x\< -resize 50% -gravity center -crop 200x200+0+0 +repage stuff_square.jpg
 	$cmd = "/usr/bin/convert $OmekaLoc/$sqthumbLoc/$archive_filename -thumbnail " . escapeshellarg('x' . $square_thumbnail_constraint*2). " -resize " . escapeshellarg($square_thumbnail_constraint*2 . 'x<'). " -resize 50% -gravity center -crop " . escapeshellarg($square_thumbnail_constraint . 'x' . $square_thumbnail_constraint . '+0+0')." +repage $OmekaLoc/$sqthumbLoc/$archive_filename";
 	// echo $cmd;
+=======
+	$cmd = "/usr/bin/convert $OmekaLoc/$thumbLoc/$archive_filename -resize " . escapeshellarg($thumbnail_constraint.'x'.$thumbnail_constraint.'>'). " $OmekaLoc/$thumbLoc/$archive_filename";
+	exec($cmd);
+
+	$cmd = "/usr/bin/convert $OmekaLoc/$sqthumbLoc/$archive_filename -thumbnail " . escapeshellarg('x' . $square_thumbnail_constraint*2). " -resize " . escapeshellarg($square_thumbnail_constraint*2 . 'x<'). " -resize 50% -gravity center -crop " . escapeshellarg($square_thumbnail_constraint . 'x' . $square_thumbnail_constraint . '+0+0')." +repage $OmekaLoc/$sqthumbLoc/$archive_filename";
+>>>>>>> 52a2ba386c7f0b429e8a4829c8b133eaa0768e76
 	exec($cmd);
 
 }
@@ -104,9 +121,16 @@ global $fileLoc;
 global $pid;
 global $dc_identifier;
 global $type;
+<<<<<<< HEAD
 
 		//connect to MySQL db
 	$con=mysqli_connect("localhost","omekajoe","jagwire","coleomekatest");
+=======
+global $con;
+
+		//connect to MySQL db
+	// $con=mysqli_connect("hostname","username","passwd","db_name");
+>>>>>>> 52a2ba386c7f0b429e8a4829c8b133eaa0768e76
 
 	if (mysqli_connect_errno())
 	{
@@ -200,7 +224,10 @@ global $type;
 	}
 
 	//purge rows associated with record_id--this is only to update xml not anything to do with other datastreams
+<<<<<<< HEAD
 	//the one below works
+=======
+>>>>>>> 52a2ba386c7f0b429e8a4829c8b133eaa0768e76
 	mysqli_query($con,"DELETE FROM omeka_element_texts WHERE record_id=(SELECT * from (SELECT record_id FROM omeka_element_texts WHERE element_id=43 AND text='{$dc_identifier}' LIMIT 1)as t)");
 
 	//iterate through DC elements and insert into table
@@ -208,7 +235,11 @@ global $type;
 	foreach ($titleArray as $title) {
 	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',50,'$record_type_id','{$title}')");
 	}
+<<<<<<< HEAD
 
+=======
+	//identifier
+>>>>>>> 52a2ba386c7f0b429e8a4829c8b133eaa0768e76
 	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('$record_id',43,'$record_type_id','{$dc_identifier}')");
 	
 	//subjects
@@ -288,4 +319,8 @@ if ($datastreamId == "DC")
 	updateDC();
 }
 
+<<<<<<< HEAD
 ?>
+=======
+?>
+>>>>>>> 52a2ba386c7f0b429e8a4829c8b133eaa0768e76

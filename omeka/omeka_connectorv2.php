@@ -2,6 +2,7 @@
 $eventInfo = array();
 include 'sensitive.php';
 include 'updateID3data.php';
+
 //variables
 $dc_identifier = $_REQUEST['dc_identifier'];
 $pid = $_REQUEST['pid'];
@@ -11,9 +12,6 @@ $sqthumbLoc = "files/square_thumbnails";
 $fullsizeLoc = "files/fullsize";
 $fileLoc = "files/original";
 
-// $dc_identifier = "wayne:MOTA_PH_19871988_5t_029";
-// $pid = "wayne:MOTA_PH_19871988_5t_029";
-// $type = "initialize";
 
 $eventInfo['pid'] = $pid;
 $eventInfo['dc_identifier'] = $dc_identifier;
@@ -45,7 +43,6 @@ $eventInfo['url'] = $url;
 	while ($ri = $response->fetch_array()) 
 	{
 		$eventInfo['record_id'] = $ri[0];
-		// echo $eventInfo['record_id'];
 	}
 
 	//Get record_type
@@ -89,6 +86,7 @@ function updateImage($eventInfo)
 	if ($eventInfo['exif']['FILE']['MimeType'] == "image/jpeg") { $eventInfo['updatedFilename'] = "$filename.jpg"; }
 	else if ($eventInfo['exif']['FILE']['MimeType'] == "image/png") { $eventInfo['updatedFilename'] = "$filename.png"; }
 	else if ($eventInfo['exif']['FILE']['MimeType'] == "image/gif") { $eventInfo['updatedFilename'] = "$filename.gif"; }
+	else if ($eventInfo['exif']['FILE']['MimeType'] == "image/bmp") { $eventInfo['updatedFilename'] = "$filename.bmp"; }	
 	else if ($eventInfo['exif']['FILE']['MimeType'] == "image/tiff") { $eventInfo['updatedFilename'] = "$filename.tiff"; }
 	else if ($eventInfo['exif']['FILE']['MimeType'] == "image/tif") { $eventInfo['updatedFilename'] = "$filename.tif"; }
 	
@@ -133,11 +131,6 @@ function updateDC($eventInfo)
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
 
-	// $response = mysqli_query($con,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
-	// while ($ri = $response->fetch_array()) 
-	// {
-	// 	$record_id = $ri[0];
-	// }
 
 	$metaArray = array();
 
@@ -210,10 +203,8 @@ function updateDC($eventInfo)
 		$rightsArray[] = $right;
 	}
 
-// var_dump(get_defined_vars());
 
-
-	//purge rows associated with record_id--this is only to update xml not anything to do with other datastreams
+	//purge rows associated with record_id--this is only to update xml, not anything to do with other datastreams
 	mysqli_query($con,"DELETE FROM omeka_element_texts WHERE record_id=(SELECT * from (SELECT record_id FROM omeka_element_texts WHERE element_id=43 AND text='{$eventInfo['dc_identifier']}' LIMIT 1)as t)");
 
 	//iterate through DC elements and insert into table
@@ -276,7 +267,6 @@ function updateDC($eventInfo)
 	}
 }
 
-// // echo "this is the record id....$record_id";
 if (ISSET($type)) {
 	if ($type == "initialize"){
 	updateImage($eventInfo);
@@ -301,7 +291,8 @@ if ($datastreamId == "DC")
 }
 
 
-
+//FOR TESTING
+// var_dump(get_defined_vars());
 
 
 ?>

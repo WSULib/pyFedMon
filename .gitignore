@@ -2,3 +2,4 @@
 sensitive.*
 *.pyc
 *.csv
+nohup*.*

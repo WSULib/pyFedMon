@@ -1,80 +1,121 @@
 <?php
-$eventInfo = array();
-include 'sensitive.php';
-include 'updateID3data.php';
 
-//variables
-$dc_identifier = $_REQUEST['dc_identifier'];
-$pid = $_REQUEST['pid'];
-$type = $_REQUEST['type'];
-$thumbLoc = "files/thumbnails";
-$sqthumbLoc = "files/square_thumbnails";
-$fullsizeLoc = "files/fullsize";
-$fileLoc = "files/original";
+   // FILE:          functions.php
+   // TITLE:         Omeka/Fedora Commons Connector Functions
+   // AUTHOR:  		 Cole Hudson, WSULS Digital Publishing Librarian
+   // CREATED:       August 2013
+   //
+   // PURPOSE:
+   // This file contains the XML and Database Functions used omeka update application;
+   //
+   // OVERALL METHOD:
+   // none - function based
+   //
+   // FUNCTIONS:
+   //
+   // INCLUDED FILES:
+   //	None
+   //
+   // DATA FILES:
+   //   None
 
 
-$eventInfo['pid'] = $pid;
-$eventInfo['dc_identifier'] = $dc_identifier;
-$eventInfo['type'] = $type;
-$eventInfo['thumbLoc'] = $thumbLoc;
-$eventInfo['sqthumbLoc'] = $sqthumbLoc;
-$eventInfo['fullsizeLoc'] = $fullsizeLoc;
-$eventInfo['fileLoc'] = $fileLoc;
-$eventInfo['host'] = $host;
-$eventInfo['username'] = $username;
-$eventInfo['password'] = $password;
-$eventInfo['omeka1db'] = $omeka1db;
-$eventInfo['omeka2db'] = $omeka2db;
-$eventInfo['FedoraLocation'] = $FedoraLocation;
-$eventInfo['OmekaLocation'] = $OmekaLocation;
-$url = "$eventInfo[FedoraLocation]/fedora/objects/$eventInfo[pid]/datastreams/ACCESS/content";
-$eventInfo['xmlURL'] = "$eventInfo[FedoraLocation]/fedora/objects/$eventInfo[pid]/datastreams/DC/content";
-$eventInfo['url'] = $url;
+function updateID3data($eventInfo) {
+	$eventInfo['mt']['mime_type'] = $eventInfo['exif']['FILE']['MimeType'];
 
-		//connect to MySQL db
-		$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omeka2db']);
+	if ($eventInfo['mt']['mime_type'] == "image/jpeg") { $eventInfo['vid']['video']['dataformat'] = "jpg"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/png") { $eventInfo['vid']['video']['dataformat'] = "png"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/gif") { $eventInfo['vid']['video']['dataformat'] = "gif"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/bmp") { $eventInfo['vid']['video']['dataformat'] = "bmp"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/tiff") { $eventInfo['vid']['video']['dataformat'] = "tiff"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/tif") { $eventInfo['vid']['video']['dataformat'] = "tif"; }
+	else { $eventInfo['video']['dataformat'] == "unknown";}
+
+	if ($eventInfo['mt']['mime_type'] == "image/jpeg") { $eventInfo['vid']['video']['lossless'] = "false"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/png") { $eventInfo['vid']['video']['lossless'] = "false"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/gif") { $eventInfo['vid']['video']['lossless'] = "false"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/bmp") { $eventInfo['vid']['video']['lossless'] = "false"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/tiff") { $eventInfo['vid']['video']['lossless'] = "true"; }
+	else if ($eventInfo['mt']['mime_type'] == "image/tif") { $eventInfo['vid']['video']['lossless'] = "true"; }
+	else { $eventInfo['vid']['video']['lossless'] = "unknown";}
+
+	if (ISSET($eventInfo['exif']['IFD0']['BitsPerSample'])) {
+		$eventInfo['vid']['video']['bits_per_sample'] = array_sum($eventInfo['exif']['IFD0']['BitsPerSample']);		
+	}
+
+	$eventInfo['vid']['video']['pixel_aspect_ratio'] = (float) 1;
+
+	if (ISSET($eventInfo['exif']['THUMBNAIL']['XResolution'])) {
+		$eventInfo['vid']['video']['resolution_x'] = $eventInfo['exif']['THUMBNAIL']['XResolution'];
+	}
+
+	if (ISSET($eventInfo['exif']['THUMBNAIL']['YResolution'])) {
+		$eventInfo['vid']['video']['resolution_y'] = $eventInfo['exif']['THUMBNAIL']['YResolution'];
+	}
+
+	if (ISSET($eventInfo['exif']['THUMBNAIL']['Compression'])) {
+		$eventInfo['vid']['video']['compression_ratio'] = $eventInfo['exif']['THUMBNAIL']['Compression'];
+	}
+	else {
+		$eventInfo['vid']['video']['compression_ratio'] = 0;
+	}
+
+	$updatedMetadata = json_encode($eventInfo['mt'] + $eventInfo['vid']);
+	// print_r($eventInfo);
+
+
+	//connect to MySQL db
+	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omeka2db']);
 
 	if (mysqli_connect_errno())
 	{
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
 
-	$response = mysqli_query($con,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
-	while ($ri = $response->fetch_array()) 
-	{
-		$eventInfo['record_id'] = $ri[0];
+	//Update Metadata, size, mime_type, type_os from omeka_files
+	mysqli_query($con, "UPDATE omeka_files SET metadata = '$updatedMetadata' WHERE item_id='{$eventInfo['record_id']}'");
+	mysqli_query($con, "UPDATE omeka_files SET size = '{$eventInfo['exif']['FILE']['FileSize']}' WHERE item_id='{$eventInfo['record_id']}'");
+	mysqli_query($con, "UPDATE omeka_files SET mime_type = '{$eventInfo['mt']['mime_type']}' WHERE item_id='{$eventInfo['record_id']}'");
+	if ($eventInfo['mt']['mime_type'] == "image/jpeg") {
+		// $type_os = "stuff2";
+		$type_os = "JPEG image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";
 	}
-
-	//Get record_type
-	$response = mysqli_query($con,"SELECT record_type FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
-	while ($rti = $response->fetch_array()) 
-	{
-		$eventInfo['record_type'] = $rti[0];
+	elseif ($eventInfo['mt']['mime_type'] == "image/png") {
+		$type_os = "PNG image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";
 	}
-
-	$response = mysqli_query($con,"SELECT filename FROM omeka_files WHERE item_id='{$eventInfo['record_id']}'");
-	while ($af = $response->fetch_array())
-	{
-		$eventInfo['oldFilename'] = $af[0];
+	elseif ($eventInfo['mt']['mime_type'] == "image/gif") {
+		$type_os = "GIF image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";
 	}
-
-	$response = mysqli_query($con,"SELECT value FROM omeka_options WHERE name='thumbnail_constraint'");
-	while ($tc = $response->fetch_array())
-	{
-		$eventInfo['thumbnail_constraint'] = $tc[0];
+	elseif ($eventInfo['mt']['mime_type'] == "image/bmp") {
+		$type_os = "BMP image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";
 	}
-
-	$response = mysqli_query($con,"SELECT value FROM omeka_options WHERE name='square_thumbnail_constraint'");
-	while ($stc = $response->fetch_array())
-	{
-		$eventInfo['square_thumbnail_constraint'] = $stc[0];
+	elseif ($eventInfo['mt']['mime_type'] == "image/tiff") {
+		$type_os = "TIFF image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";
 	}
+	elseif ($eventInfo['mt']['mime_type'] == "image/tif") {
+		$type_os = "TIFF image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";
+	}
+	else { $type_os = "unknown image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";}
+	mysqli_query($con, "UPDATE omeka_files SET type_os = '$type_os' WHERE item_id='{$eventInfo['record_id']}'");
 
-$outputfile = "$eventInfo[OmekaLocation]/$eventInfo[fileLoc]/$eventInfo[oldFilename]";
-$eventInfo['outputfile'] = $outputfile;
+
+
+	//update file title to where original_filename from omeka_files matches dc:title
+	$xml = simplexml_load_file($eventInfo['xmlURL']);
+
+	$titleArray = array();
+	$titles = $xml->xpath('//dc:title');
+	foreach ($titles as $title) {
+		$titleArray[] = $title;
+	}
+	mysqli_query($con, "UPDATE omeka_files SET original_filename = '$title' WHERE item_id='{$eventInfo['record_id']}'");
+}
 
 function updateImage($eventInfo)
 {
+	$outputfile = "$eventInfo[OmekaLocation]/$eventInfo[fileLoc]/$eventInfo[oldFilename]";
+	$eventInfo['outputfile'] = $outputfile;
+	
 	$cmd = "wget $eventInfo[url] --output-document=$eventInfo[outputfile]";
 	exec($cmd);
 
@@ -121,6 +162,7 @@ function updateImage($eventInfo)
 	updateID3data($eventInfo);
 }
 
+
 function updateDC($eventInfo)
 {
 	//connect to MySQL db
@@ -131,6 +173,10 @@ function updateDC($eventInfo)
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
 
+//Set character set/encoding
+	mysqli_set_charset($con, "utf8");
+	// $charset = mysqli_character_set_name($con);
+	// printf ("Current character set is %s\n",$charset);
 
 	$metaArray = array();
 
@@ -266,33 +312,6 @@ function updateDC($eventInfo)
 	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',47,'{$eventInfo['record_type']}','{$right}')");
 	}
 }
-
-if (ISSET($type)) {
-	if ($type == "initialize"){
-	updateImage($eventInfo);
-	updateDC($eventInfo);
-}
-}
-
-else {
-	$datastreamId = $_REQUEST['datastreamId'];
-	//Uncomment below line to test and comment out line above
-	// $datastreamId = 'ACCESS';
-	//Datastream ID
-if ($datastreamId == "ACCESS")
-{
-	updateImage($eventInfo);
-}
-
-if ($datastreamId == "DC") 
-{
-	updateDC($eventInfo);
-}
-}
-
-
-//FOR TESTING
-// var_dump(get_defined_vars());
 
 
 ?>

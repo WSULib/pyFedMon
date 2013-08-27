@@ -53,8 +53,10 @@ $eventInfo['password'] = $password;
 $eventInfo['omekaDB'] = $omekaDB;
 $eventInfo['FedoraLocation'] = $FedoraLocation;
 $eventInfo['OmekaLocation'] = $OmekaLocation;
-$url = "$eventInfo[FedoraLocation]/fedora/objects/$eventInfo[pid]/datastreams/ACCESS/content";
-$eventInfo['xmlURL'] = "$eventInfo[FedoraLocation]/fedora/objects/$eventInfo[pid]/datastreams/DC/content";
+$eventInfo['ImageContentType'] = $ImageContentType;
+$eventInfo['DCContentType'] = $DCContentType;
+$url = "$eventInfo[FedoraLocation]/fedora/objects/$eventInfo[pid]/datastreams/$eventInfo[ImageContentType]/content";
+$eventInfo['xmlURL'] = "$eventInfo[FedoraLocation]/fedora/objects/$eventInfo[pid]/datastreams/$eventInfo[DCContentType]/content";
 $eventInfo['url'] = $url;
 
 	//connect to MySQL db
@@ -103,7 +105,9 @@ $eventInfo['url'] = $url;
 
 
 
-if (ISSET($type)) {
+if (ISSET($_REQUEST['type'])) {
+	$type = $_REQUEST['type'];
+
 	if ($type == "initialize"){
 	updateImage($eventInfo);
 	updateDC($eventInfo);
@@ -115,15 +119,15 @@ else {
 	// ***********************
 	// FOR TESTING
 	// Uncomment below one or both of the lines and comment out line above
-	// $datastreamId = 'DC';
-	// $datastreamId = 'ACCESS';
+	// $datastreamId = "$eventInfo[DCContentType]";
+	// $datastreamId = "$eventInfo[ImageContentType]";
 	// ***********************
-if ($datastreamId == "ACCESS")
+if ($datastreamId == "$eventInfo[ImageContentType]")
 {
 	updateImage($eventInfo);
 }
 
-if ($datastreamId == "DC") 
+if ($datastreamId == "$eventInfo[DCContentType]") 
 {
 	updateDC($eventInfo);
 }

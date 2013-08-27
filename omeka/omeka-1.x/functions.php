@@ -6,22 +6,18 @@
    // CREATED:       August 2013
    //
    // PURPOSE:
-   // This file contains the XML and Database Functions used omeka update application
-   // it does not depend on any other files
+   // This file contains the XML and Database Functions used by the omeka update application;
    //
    // OVERALL METHOD:
    // none - function based
    //
    // FUNCTIONS:
-   // updateID3data
-   // updateImage
-   // updateDC
    //
    // INCLUDED FILES:
-   //	None
+   // None
    //
    // DATA FILES:
-   //   None
+   // None
 
 
 function updateID3data($eventInfo) {
@@ -64,24 +60,18 @@ function updateID3data($eventInfo) {
 		$eventInfo['vid']['video']['compression_ratio'] = 0;
 	}
 
-	$updatedMetadata = json_encode($eventInfo['mt'] + $eventInfo['vid']);
-	// print_r($eventInfo);
-
-
 	//connect to MySQL db
-	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omeka2db']);
+	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omekaDB']);
 
 	if (mysqli_connect_errno())
 	{
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
 
-	//Update Metadata, size, mime_type, type_os from omeka_files
-	mysqli_query($con, "UPDATE omeka_files SET metadata = '$updatedMetadata' WHERE item_id='{$eventInfo['record_id']}'");
+	//Update size, mime_browser, type_os from omeka_files
 	mysqli_query($con, "UPDATE omeka_files SET size = '{$eventInfo['exif']['FILE']['FileSize']}' WHERE item_id='{$eventInfo['record_id']}'");
-	mysqli_query($con, "UPDATE omeka_files SET mime_type = '{$eventInfo['mt']['mime_type']}' WHERE item_id='{$eventInfo['record_id']}'");
+	mysqli_query($con, "UPDATE omeka_files SET mime_browser = '{$eventInfo['mt']['mime_type']}' WHERE item_id='{$eventInfo['record_id']}'");
 	if ($eventInfo['mt']['mime_type'] == "image/jpeg") {
-		// $type_os = "stuff2";
 		$type_os = "JPEG image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";
 	}
 	elseif ($eventInfo['mt']['mime_type'] == "image/png") {
@@ -102,7 +92,8 @@ function updateID3data($eventInfo) {
 	else { $type_os = "unknown image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";}
 	mysqli_query($con, "UPDATE omeka_files SET type_os = '$type_os' WHERE item_id='{$eventInfo['record_id']}'");
 
-
+	$updatedMetadata = json_encode($eventInfo['mt'] + $eventInfo['vid']);
+	// print_r($eventInfo);
 
 	//update file title to where original_filename from omeka_files matches dc:title
 	$xml = simplexml_load_file($eventInfo['xmlURL']);
@@ -136,13 +127,13 @@ function updateImage($eventInfo)
 	else if ($eventInfo['exif']['FILE']['MimeType'] == "image/tif") { $eventInfo['updatedFilename'] = "$filename.tif"; }
 	
 //connect to MySQL db
-	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omeka2db']);
+	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omekaDB']);
 
 	if (mysqli_connect_errno())
 	{
 		echo "Failed to connect to MySQL: " . mysqli_connect_error();
 	}
-	mysqli_query($con, "UPDATE omeka_files SET filename = '{$eventInfo['updatedFilename']}' WHERE item_id='{$eventInfo['record_id']}'");	
+	mysqli_query($con, "UPDATE omeka_files SET archive_filename = '{$eventInfo['updatedFilename']}' WHERE item_id='{$eventInfo['record_id']}'");	
 
 	$newOutputfile = "$eventInfo[OmekaLocation]/$eventInfo[fileLoc]/$eventInfo[updatedFilename]";
 	$eventInfo['newOutputfile'] = $newOutputfile;
@@ -157,10 +148,12 @@ function updateImage($eventInfo)
 	$cmd = "chown www-data:www-data $eventInfo[OmekaLocation]/$eventInfo[fullsizeLoc]/$eventInfo[updatedFilename] $eventInfo[OmekaLocation]/$eventInfo[thumbLoc]/$eventInfo[updatedFilename] $eventInfo[OmekaLocation]/$eventInfo[sqthumbLoc]/$eventInfo[updatedFilename] $eventInfo[newOutputfile]";
 	exec($cmd);
 
-	$cmd = "/usr/bin/convert $eventInfo[OmekaLocation]/$eventInfo[thumbLoc]/$eventInfo[updatedFilename] -background white -flatten -thumbnail " . escapeshellarg($eventInfo[thumbnail_constraint].'x'.$eventInfo[thumbnail_constraint].'>'). " $eventInfo[OmekaLocation]/$eventInfo[thumbLoc]/$eventInfo[updatedFilename]";
+	$cmd = "/usr/bin/convert $eventInfo[OmekaLocation]/$eventInfo[thumbLoc]/$eventInfo[updatedFilename] -resize " . escapeshellarg($eventInfo[thumbnail_constraint].'x'.$eventInfo[thumbnail_constraint].'>'). " $eventInfo[OmekaLocation]/$eventInfo[thumbLoc]/$eventInfo[updatedFilename]";
+
 	exec($cmd);
 
-	$cmd = "/usr/bin/convert $eventInfo[OmekaLocation]/$eventInfo[sqthumbLoc]/$eventInfo[updatedFilename] -thumbnail " . escapeshellarg('x' . $eventInfo[square_thumbnail_constraint]*2). " -resize " . escapeshellarg($eventInfo[square_thumbnail_constraint]*2 . 'x<'). " -resize 50% -background white -flatten -gravity center -crop " . escapeshellarg($eventInfo[square_thumbnail_constraint] . 'x' . $eventInfo[square_thumbnail_constraint] . '+0+0')." +repage $eventInfo[OmekaLocation]/$eventInfo[sqthumbLoc]/$eventInfo[updatedFilename]";
+	$cmd = "/usr/bin/convert $eventInfo[OmekaLocation]/$eventInfo[sqthumbLoc]/$eventInfo[updatedFilename] -thumbnail " . escapeshellarg('x' . $eventInfo[square_thumbnail_constraint]*2). " -resize " . escapeshellarg($eventInfo[square_thumbnail_constraint]*2 . 'x<'). " -resize 50% -gravity center -crop " . escapeshellarg($eventInfo[square_thumbnail_constraint] . 'x' . $eventInfo[square_thumbnail_constraint] . '+0+0')." +repage $eventInfo[OmekaLocation]/$eventInfo[sqthumbLoc]/$eventInfo[updatedFilename]";
+
 	exec($cmd);
 
 	updateID3data($eventInfo);
@@ -170,7 +163,7 @@ function updateImage($eventInfo)
 function updateDC($eventInfo)
 {
 	//connect to MySQL db
-	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omeka2db']);
+	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omekaDB']);
 
 	if (mysqli_connect_errno())
 	{
@@ -260,60 +253,60 @@ function updateDC($eventInfo)
 	//iterate through DC elements and insert into table
 	//title
 	foreach ($titleArray as $title) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',50,'{$eventInfo['record_type']}','{$title}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',50,'{$eventInfo['record_type']}','{$title}')");
 	}
-		// $response = mysqli_query($con,"SELECT record_id FROM omeka_element_texts WHERE element_id=43 and text='{$dc_identifier}'");
+
 	//identifier
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',43,'{$eventInfo['record_type']}','{$eventInfo['dc_identifier']}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',43,'{$eventInfo['record_type']}','{$eventInfo['dc_identifier']}')");
 	
 	//subjects
 	foreach ($subjArray as $subject) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',49,'{$eventInfo['record_type']}','{$subject}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',49,'{$eventInfo['record_type']}','{$subject}')");
 	}
 
 	//description
 	foreach ($descripArray as $description) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',41,'{$eventInfo['record_type']}','{$description}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',41,'{$eventInfo['record_type']}','{$description}')");
 	}	
 
 	//creator
 	foreach ($creatorArray as $creator) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',39,'{$eventInfo['record_type']}','{$creator}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',39,'{$eventInfo['record_type']}','{$creator}')");
 	}	
 
 	//date
 	foreach ($dateArray as $date) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',40,'{$eventInfo['record_type']}','{$date}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',40,'{$eventInfo['record_type']}','{$date}')");
 	}	
 
 	//type
 	foreach ($typeArray as $type) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',51,'{$eventInfo['record_type']}','{$type}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',51,'{$eventInfo['record_type']}','{$type}')");
 	}	
 
 	//format
 	foreach ($formatArray as $format) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',42,'{$eventInfo['record_type']}','{$format}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',42,'{$eventInfo['record_type']}','{$format}')");
 	}	
 
 	//language
 	foreach ($langArray as $language) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',44,'{$eventInfo['record_type']}','{$language}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',44,'{$eventInfo['record_type']}','{$language}')");
 	}	
 
 	//relation
 	foreach ($relatArray as $relation) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',46,'{$eventInfo['record_type']}','{$relation}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',46,'{$eventInfo['record_type']}','{$relation}')");
 	}	
 
 	//coverage
 	foreach ($coverArray as $coverage) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',38,'{$eventInfo['record_type']}','{$coverage}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',38,'{$eventInfo['record_type']}','{$coverage}')");
 	}	
 
 	//rights
 	foreach ($rightsArray as $rights) {
-	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type, text) VALUES ('{$eventInfo['record_id']}',47,'{$eventInfo['record_type']}','{$right}')");
+	mysqli_query($con,"INSERT INTO omeka_element_texts (record_id, element_id, record_type_id, text) VALUES ('{$eventInfo['record_id']}',47,'{$eventInfo['record_type']}','{$right}')");
 	}
 }
 

@@ -6,7 +6,7 @@
    // CREATED:       August 2013
    //
    // PURPOSE:
-   // This file contains the XML and Database Functions used omeka update application;
+   // This file contains the XML and Database Functions used by the omeka update application;
    //
    // OVERALL METHOD:
    // none - function based
@@ -14,10 +14,10 @@
    // FUNCTIONS:
    //
    // INCLUDED FILES:
-   //	None
+   // None
    //
    // DATA FILES:
-   //   None
+   // None
 
 
 function updateID3data($eventInfo) {
@@ -65,7 +65,7 @@ function updateID3data($eventInfo) {
 
 
 	//connect to MySQL db
-	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omeka2db']);
+	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omekaDB']);
 
 	if (mysqli_connect_errno())
 	{
@@ -77,7 +77,6 @@ function updateID3data($eventInfo) {
 	mysqli_query($con, "UPDATE omeka_files SET size = '{$eventInfo['exif']['FILE']['FileSize']}' WHERE item_id='{$eventInfo['record_id']}'");
 	mysqli_query($con, "UPDATE omeka_files SET mime_type = '{$eventInfo['mt']['mime_type']}' WHERE item_id='{$eventInfo['record_id']}'");
 	if ($eventInfo['mt']['mime_type'] == "image/jpeg") {
-		// $type_os = "stuff2";
 		$type_os = "JPEG image data, JFIF standard 1.01, comment: File source: $eventInfo[url]";
 	}
 	elseif ($eventInfo['mt']['mime_type'] == "image/png") {
@@ -132,7 +131,7 @@ function updateImage($eventInfo)
 	else if ($eventInfo['exif']['FILE']['MimeType'] == "image/tif") { $eventInfo['updatedFilename'] = "$filename.tif"; }
 	
 //connect to MySQL db
-	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omeka2db']);
+	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omekaDB']);
 
 	if (mysqli_connect_errno())
 	{
@@ -166,7 +165,7 @@ function updateImage($eventInfo)
 function updateDC($eventInfo)
 {
 	//connect to MySQL db
-	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omeka2db']);
+	$con = mysqli_connect($eventInfo['host'],$eventInfo['username'],$eventInfo['password'],$eventInfo['omekaDB']);
 
 	if (mysqli_connect_errno())
 	{

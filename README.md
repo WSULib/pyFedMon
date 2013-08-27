@@ -9,6 +9,6 @@ command: <em>nohup python pyFedMon.py &</em>
   - might be worth considering adding as Cron Job to ensure always running
 
 <h3>Update:</h3>
-omeka_connectorv2.php (for Omeka 2.x installations) is stable and functional
+omeka-2.x (for Omeka 2.x installations) is stable and functional
 
-omeka_connector.php (for Omeka 1.x installations) is a work-in-progress
+omeka-1.x (for Omeka 1.x installations) is stable and functional

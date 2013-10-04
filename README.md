@@ -9,10 +9,7 @@ Utility for monitoring Fedora logs (currently focusing on connector to Omeka fro
 <ol>
 	<li>Place a copy of the code in a directory on your Fedora Commons server.</li>
 	<li>Edit sensitive_EDITME.py per its instructions.</li>
-	<li>Edit the altID field of every Fedora Object you wish to place into Omeka to reflect the FQDN of the omeka_connector.php as found your Omeka server.</li>
-<ul>
-	<li>For example: http://www.example.org/pyFedMon/omeka-2.x/omeka_connector.php</li>
-</ul>
+	<li>Edit the altID field of every Fedora Object you wish to place into Omeka to reflect the FQDN of the omeka_connector.php as found your Omeka server. For example: http://www.example.org/pyFedMon/omeka-2.x/omeka_connector.php</li>
 </ol>
 
 <h4>Omeka Initial Config</h4>
@@ -26,10 +23,7 @@ Utility for monitoring Fedora logs (currently focusing on connector to Omeka fro
 <ol>
 	<li>Run csv_creator.py, using as an argument the PID of the collection Object that contains all the items you want to be in Omeka</li>
 	<li>CSV will be generated in directory.</li>
-	<li>Install and run <a href="http://omeka.org/add-ons/plugins/csv-import/">CSV Import plugin</a> using the csv that is generated from csv_creator.</li>
-<ul>
-	<li>Import should create an placeholder omeka items with correct pids and a placeholder image and metadata.</li>
-</ul> 
+	<li>Install and run <a href="http://omeka.org/add-ons/plugins/csv-import/">CSV Import plugin</a> using the csv that is generated from csv_creator.  Import should create placeholder omeka items with correct pids and a placeholder image and metadata.</li>
 </ol>
 
 <h3>Initial Sync</h3>

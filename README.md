@@ -19,26 +19,26 @@ Utility for monitoring Fedora logs (currently focusing on connector to Omeka fro
 	<li>Make your location of omeka_connector.php matches the URI found in the altID fields of the objects you are importing from Fedora Commons to Omeka.</li>
 </ol>
 
-<h3>Run CSV Creator</h3>
+<h4>Run CSV Creator</h4>
 <ol>
 	<li>Run csv_creator.py, using as an argument the PID of the collection Object that contains all the items you want to be in Omeka</li>
 	<li>CSV will be generated in directory.</li>
 	<li>Install and run <a href="http://omeka.org/add-ons/plugins/csv-import/">CSV Import plugin</a> using the csv that is generated from csv_creator.  Import should create placeholder omeka items with correct pids and a placeholder image and metadata.</li>
 </ol>
 
-<h3>Initial Sync</h3>
+<h4>Initial Sync</h4>
 <ol>
 	<li>Run updateAll.py using as an argument the same PID of the relevant collection Object.</li>
 	<li>Content should now be synced with Fedora Commons collection, thereby replacing placeholder image and metadata.</li>
 </ol>
 
-<h3>Launch Fedora-side Monitor</h3>
+<h4>Launch Fedora-side Monitor</h4>
 Run the below command to start the Fedora monitor.  This will automatically propagate changes in Fedora over to Omeka.
 command: <em>nohup python pyFedMon.py &</em>
   - this ensures the script runs as a process in the background and does not exit between detections
   - might be worth considering adding as Cron Job to ensure always running
 
-<h3>Update:</h3>
+<h4>Update:</h4>
 omeka-2.x (for Omeka 2.x installations) is stable and functional
 
 omeka-1.x (for Omeka 1.x installations) is stable and functional
